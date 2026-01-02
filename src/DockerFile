@@ -1,14 +1,25 @@
-# Base image jisme Java runtime already hai
-FROM eclipse-temurin:17-jre-alpine
+# Stage 1: Build stage - Gradle ke saath
+FROM gradle:7.6.1-jdk17 AS build
 
-# Container ke andar working directory set kar rahe hain
+# Working directory set karo
 WORKDIR /app
 
-# Tumhara build hua fat jar file container me copy kar rahe hain
-COPY build/libs/car-tax-app-server-all.jar app.jar
+# Pura source code copy karo
+COPY . .
 
-# Port expose kar rahe hain (server jis port pe chalega)
+# Shadow jar build karo
+RUN ./gradlew shadowJar --no-daemon
+
+# Stage 2: Runtime stage - lightweight Java runtime
+FROM eclipse-temurin:17-jre-alpine
+
+WORKDIR /app
+
+# Build stage se fat jar copy karo
+COPY --from=build /app/build/libs/car-tax-app-server-all.jar app.jar
+
+# Server ka port expose karo
 EXPOSE 8080
 
-# Server chalane ke liye command
+# Server start karne ka command
 CMD ["java", "-Xms128m", "-Xmx512m", "-jar", "app.jar"]
