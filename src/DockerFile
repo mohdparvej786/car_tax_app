@@ -22,8 +22,4 @@ COPY --from=build /app/build/libs/car-tax-app-server-all.jar app.jar
 EXPOSE 8080
 
 # Server start karne ka command
-<<<<<<< HEAD
 CMD ["java", "-Xms128m", "-Xmx512m", "-jar", "app.jar"]
-=======
-CMD ["java", "-Xms128m", "-Xmx512m", "-jar", "app.jar"]
->>>>>>> 4586c4050969f6b0e11e393fb486c288bf35ab90
