@@ -1,0 +1,14 @@
+# Base image jisme Java runtime already hai
+FROM eclipse-temurin:17-jre-alpine
+
+# Container ke andar working directory set kar rahe hain
+WORKDIR /app
+
+# Tumhara build hua fat jar file container me copy kar rahe hain
+COPY build/libs/car-tax-app-server-all.jar app.jar
+
+# Port expose kar rahe hain (server jis port pe chalega)
+EXPOSE 8080
+
+# Server chalane ke liye command
+CMD ["java", "-Xms128m", "-Xmx512m", "-jar", "app.jar"]

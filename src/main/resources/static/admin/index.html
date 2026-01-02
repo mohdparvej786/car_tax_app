@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Driver Admin Panel</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background: #f4f4f4;
+        }
+
+        button {
+            margin-left: 4px;
+            cursor: pointer;
+        }
+
+        .copy-btn {
+            font-size: 12px;
+        }
+
+        .delete-btn {
+            background: red;
+            color: white;
+            border: none;
+            padding: 4px 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>🚖 Driver Details Admin Panel</h2>
+
+<table id="drivers-table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Visiting State</th>
+        <th>Vehicle Number</th>
+        <th>Seat Capacity</th>
+        <th>Whatsapp</th>
+        <th>Entry Border</th>
+        <th>Tax Mode</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Total</th>
+        <th>Tax Paid</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+    const apiBase = 'http://localhost:8080';
+
+    function copyText(text) {
+        navigator.clipboard.writeText(text)
+            .then(() => {
+                alert("Copied: " + text);
+            })
+            .catch(err => {
+                console.error("Copy failed", err);
+            });
+    }
+
+    async function fetchDrivers() {
+        const res = await fetch(`${apiBase}/drivers`);
+        const drivers = await res.json();
+
+        const tbody = document.querySelector('#drivers-table tbody');
+        tbody.innerHTML = '';
+
+        drivers.forEach(driver => {
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+<td>${driver.id} <button class="copy-btn" onclick="copyText('${driver.id}')">📋</button></td>
+
+<td>${driver.visitingState}
+    <button class="copy-btn" onclick="copyText('${driver.visitingState}')">📋</button>
+</td>
+
+<td>${driver.vehicleNumber}
+    <button class="copy-btn" onclick="copyText('${driver.vehicleNumber}')">📋</button>
+</td>
+
+<td>${driver.seatCapacity}
+    <button class="copy-btn" onclick="copyText('${driver.seatCapacity}')">📋</button>
+</td>
+
+<td>${driver.whatsappNumber}
+    <button class="copy-btn" onclick="copyText('${driver.whatsappNumber}')">📋</button>
+</td>
+
+<td>${driver.entryBorder}
+    <button class="copy-btn" onclick="copyText('${driver.entryBorder}')">📋</button>
+</td>
+
+<td>${driver.taxMode}
+    <button class="copy-btn" onclick="copyText('${driver.taxMode}')">📋</button>
+</td>
+
+<td>${driver.taxFromDate}
+    <button class="copy-btn" onclick="copyText('${driver.taxFromDate}')">📋</button>
+</td>
+
+<td>${driver.taxToDate}
+    <button class="copy-btn" onclick="copyText('${driver.taxToDate}')">📋</button>
+</td>
+
+<td>${driver.totalPayment}
+    <button class="copy-btn" onclick="copyText('${driver.totalPayment}')">📋</button>
+</td>
+
+<td>${driver.isTaxPaidToGovernment}
+    <button class="copy-btn" onclick="copyText('${driver.isTaxPaidToGovernment}')">📋</button>
+</td>
+
+<td>
+    <button class="delete-btn" onclick="deleteDriver(${driver.id})">Delete</button>
+</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    async function deleteDriver(id) {
+        if (!confirm('Delete this record?')) return;
+        await fetch(`${apiBase}/drivers/${id}`, {method: 'DELETE'});
+        fetchDrivers();
+    }
+
+    // Initial load
+    fetchDrivers();
+
+    // Auto refresh every 5 seconds
+    setInterval(fetchDrivers, 5000);
+</script>
+
+</body>
+</html>
