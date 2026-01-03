@@ -18,6 +18,7 @@ application {
 }
 
 dependencies {
+
     implementation("org.flywaydb:flyway-core:11.19.1")
     implementation("org.flywaydb:flyway-database-postgresql:11.19.1") // ⭐ MUST
     implementation("io.ktor:ktor-server-core")
@@ -35,3 +36,4 @@ dependencies {
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }
+
