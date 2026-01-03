@@ -14,6 +14,7 @@ object DatabaseFactory {
     fun doMigration() {
         val flyway = Flyway.configure()
             .dataSource(jdbcUrl, dbUser, dbPassword)
+            .locations("classpath:db/migration")
             .load()
 
 //        println(Flyway.configure().locations.contentToString())
