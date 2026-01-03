@@ -13,13 +13,27 @@ object DatabaseFactory {
     private val dbName = System.getenv("DB_NAME") ?: "car_tax_app_db"
 
 
-    private val rawDatabaseUrl = System.getenv("DATABASE_URL")
-        ?: "postgresql://$dbHost:5432/$dbName"
+    // ✅ FIXED: Proper JDBC URL conversion
+    private val jdbcUrl: String by lazy {
+        val envUrl = System.getenv("DATABASE_URL")
+            ?: "postgresql://localhost:5432/car_tax_app_db"
 
-    private val jdbcUrl = rawDatabaseUrl.replace(
-        "postgresql://",
-        "jdbc:postgresql://"
-    )
+        print("🔧 Original URL: $envUrl")
+
+        // Convert to JDBC format
+        val jdbcUrl = if (envUrl.startsWith("jdbc:postgresql://")) {
+            envUrl
+        } else if (envUrl.startsWith("postgresql://")) {
+            "jdbc:$envUrl"
+        } else {
+            "jdbc:postgresql://$envUrl"
+        }
+
+        print("🔧 Converted to JDBC: $jdbcUrl")
+        jdbcUrl
+    }
+
+
 
 
     fun doMigration() {
