@@ -14,9 +14,9 @@ object DatabaseFactory {
     fun doMigration() {
         val flyway = Flyway.configure()
             .dataSource(jdbcUrl, dbUser, dbPassword)
-            .locations("classpath:db/migration")   // explicit migration folder location
-            .failOnMissingLocations(false)          // agar koi location missing hai to bhi fail na ho
             .load()
+
+//        println(Flyway.configure().locations.contentToString())
 
         flyway.migrate()
     }
