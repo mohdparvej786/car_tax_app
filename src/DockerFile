@@ -1,25 +1,38 @@
-# Stage 1: Build stage - Gradle ke saath
-FROM gradle:7.6.1-jdk17 AS build
-
-# Working directory set karo
+# Stage 1: Build the application
+# We use a specific Gradle version and JDK to ensure reproducibility
+FROM gradle:8-jdk21 AS build
+# Set the working directory inside the builder container
+WORKDIR /home/gradle/src
+# Copy only necessary files first to leverage Docker cache for dependencies
+# copying settings.gradle.kts and build.gradle.kts first allows us to download dependencies
+# without rebuilding the cache if only source code changes.
+COPY --chown=gradle:gradle build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY --chown=gradle:gradle gradle ./gradle
+# Copy the rest of the source code
+COPY --chown=gradle:gradle . .
+# Build the distribution (this creates /build/install/car-tax-app-server)
+# --no-daemon ensures Gradle doesn't linger in the background
+# -x test skips tests during build to speed up deployment (tests should run in CI pipeline)
+RUN ./gradlew clean installDist --no-daemon -x test
+# -----------------------------------------------------------------------------
+# Stage 2: Create the production image
+# Use a lightweight JRE image (Eclipse Temurin is a standard production choice)
+FROM eclipse-temurin:21-jre-alpine
+# Install bash as some startup scripts might require it, though standard sh usually works.
+# Also good for debugging if you ever need to exec into the pod.
+RUN apk add --no-cache bash
+# Create a dedicated directory for the app
 WORKDIR /app
-
-# Pura source code copy karo
-COPY . .
-
-# Shadow jar build karo
-RUN ./gradlew shadowJar --no-daemon
-
-# Stage 2: Runtime stage - lightweight Java runtime
-FROM eclipse-temurin:17-jre-alpine
-
-WORKDIR /app
-
-# Build stage se fat jar copy karo
-COPY --from=build /app/build/libs/car-tax-app-server-all.jar app.jar
-
-# Server ka port expose karo
+# Create a non-root user and group for security
+# It is best practice not to run applications as root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# Copy the built application from the 'build' stage
+# We assume the folder name matches your rootProject.name 'car-tax-app-server'
+COPY --from=build --chown=appuser:appgroup /home/gradle/src/build/install/car-tax-app-server /app
+# Switch to the non-root user
+USER appuser
+# Expose the port Ktor runs on (default is 8080)
 EXPOSE 8080
-
-# Server start karne ka command
-CMD ["java", "-Xms128m", "-Xmx512m", "-jar", "app.jar"]
+# Run the application using the generated script
+# Using "exec" ensures the java process becomes PID 1, receiving signals (SIGTERM) correctly
+CMD ["/bin/bash", "/app/bin/car-tax-app-server"]

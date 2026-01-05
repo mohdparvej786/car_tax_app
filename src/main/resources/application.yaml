@@ -4,15 +4,11 @@ ktor:
       - com.example.ApplicationKt.module
   deployment:
     port: 8080
-  postgres:
-    driver: org.postgresql.Driver
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/car_tax_app_db}
-    user: ${DB_USER:mohdparvej}
-    password: ${DB_PASSWORD:}
-
-  flyway:
-    locations = "classpath:db/migration"
-
+#  postgres:
+#    driver: org.postgresql.Driver
+#    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/car_tax_app_db}
+#    user: ${DB_USER:mohdparvej}
+#    password: ${DB_PASSWORD:}
 
 
 

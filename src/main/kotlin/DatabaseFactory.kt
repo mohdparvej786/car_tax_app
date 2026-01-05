@@ -2,6 +2,8 @@ package com.example
 
 import org.jetbrains.exposed.sql.Database
 import org.flywaydb.core.Flyway
+import org.flywaydb.core.api.callback.Callback
+import kotlin.emptyArray
 
 object DatabaseFactory {
 
@@ -37,9 +39,8 @@ object DatabaseFactory {
 
 
     fun doMigration() {
-        val flyway = Flyway.configure()
+         var flyway = Flyway.configure()
             .dataSource(jdbcUrl, dbUser, dbPassword)
-            .locations("classpath:db/migration")
             .load()
 
 
